@@ -1,0 +1,2 @@
+test2/segments.txt
+test2/dirih.txt

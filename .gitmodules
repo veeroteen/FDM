@@ -1,0 +1,3 @@
+[submodule "FDM/Calculator"]
+	path = FDM/Calculator
+	url = https://github.com/ArashPartow/exprtk.git
