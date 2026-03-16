@@ -11,9 +11,19 @@ template <Field T>
 size_t rayCastRight(const Vector2<T> &node, const std::vector<Border<T>> &borders);
 
 template <Field T>
-void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundaries, std::vector<Node<T>> *nodes,std::pair<int,int> &size)
+void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundaries, std::vector<Node<T>> *nodes,std::pair<int,int> &size, T &lambda, T &gamma)
 {
 	std::ifstream config(cfg);
+	
+	std::string constants;
+	std::getline(config, constants);
+
+	{
+		std::ifstream constns(constants);
+		constns >> lambda >> gamma;
+	}
+
+
 	std::string seg;
 	std::getline(config, seg);
 	std::vector<Segment<T>> segX;
@@ -89,13 +99,13 @@ void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundari
 		std::string neu;
 		std::getline(config, neu);
 		std::ifstream neumann(neu);
-		T x1, x2, y1, y2, lambda,x,y;
+		T x1, x2, y1, y2,x,y;
 		size_t n = 0;
 		neumann >> n;
 
 		for (size_t i = 0; i < n; i++)
 		{
-			neumann >> x1 >> x2 >> y1 >> y2 >> lambda >> x >> y;
+			neumann >> x1 >> x2 >> y1 >> y2 >> x >> y;
 			std::getline(neumann, neu);
 			StringFun<T> *fun = new StringFun<T>(neu);
 			if (x1 == x2)
@@ -114,13 +124,13 @@ void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundari
 		std::string rob;
 		std::getline(config, rob);
 		std::ifstream robin(rob);
-		T x1, x2, y1, y2, lambda,beta,x,y;
+		T x1, x2, y1, y2,beta,x,y;
 		size_t n = 0;
 		robin >> n;
 
 		for (size_t i = 0; i < n; i++)
 		{
-			robin >> x1 >> x2 >> y1 >> y2 >> lambda >> beta >> x >> y;
+			robin >> x1 >> x2 >> y1 >> y2 >> beta >> x >> y;
 			std::getline(robin, rob);
 			StringFun<T> *fun = new StringFun<T>(rob);
 			if (x1 == x2)
@@ -151,39 +161,48 @@ void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundari
 					cords.x = segX[j].a;
 					for (size_t x = 0; x < segX[j].n - (j == segX.size()-1 ? 0 : 1); x++)
 					{
-						if(rayCastRight(cords,vertical)%2 == 1)
+						bool flag = false;
+						size_t nb = 0;
+						BoundryCond bc = BoundryCond::NO;
+						for (auto &a : horizontal)
 						{
-							size_t nb = 0;
-							BoundryCond bc = BoundryCond::NO;
-							for(auto &a : horizontal)
+							if (a.onBorder(cords))
 							{
-								if(a.onBorder(cords))
+								auto temp = (*boundaries)[a.n]->getType();
+								flag = true;
+								if (temp < bc)
 								{
-									auto temp = (*boundaries)[a.n]->getType();
-										
-									if(temp < bc)
-									{
-										bc = temp;
-										nb = a.n;
-									}
+									bc = temp;
+									nb = a.n;
 								}
 							}
-							for (auto &a : vertical)
+						}
+						for (auto &a : vertical)
+						{
+							if (a.onBorder(cords))
 							{
-								if (a.onBorder(cords))
+								auto temp = (*boundaries)[a.n]->getType();
+								flag = true;
+								if (temp < bc)
 								{
-									auto temp = (*boundaries)[a.n]->getType();
-
-									if (temp < bc)
-									{
-										bc = temp;
-										nb = a.n;
-									}
+									bc = temp;
+									nb = a.n;
 								}
 							}
-							nodes->emplace_back(cords.x, cords.y, counter, hX, hY,nb, bc);
 						}
 
+						if(bc == BoundryCond::NO)
+						{
+							flag = rayCastRight(cords, vertical) % 2 == 1;
+						}
+						if (flag)
+						{
+							nodes->emplace_back(cords.x, cords.y, counter, hX, hY, nb, bc);
+						}
+						else
+						{
+							nodes->emplace_back(cords.x, cords.y, counter, hX, hY, nb, BoundryCond::OUTLINE);
+						}
 						cords.x += hX;
 						hX *= segX[j].q;
 						counter++;
@@ -207,7 +226,7 @@ size_t rayCastRight(const Vector2<T> &node,const std::vector<Border<T>> &borders
 	size_t counter = 0;
 	for(size_t i = 0; i < borders.size();i++)
 	{
-		if(node.y >= borders[i].y1 && node.y <= borders[i].y2 && node.x >= borders[i].x1)
+		if(((node.y < borders[i].y1) != (node.y < borders[i].y2)) && node.x <= borders[i].x1)
 		{
 			if (borders[i].onBorder(node))
 			{

@@ -8,10 +8,10 @@ int main()
 	
 	auto fun = [](const std::map<std::string, double> &args)
 		{
-			return 0;//args.find("x")->second + args.find("y")->second;
+			return 0;// 2 * (args.find("x")->second + args.find("y")->second);
 		};
 	StaticFun<double> f(fun);
-	std::string conf = "test4/config.txt";
+	std::string conf = "testF1/config.txt";
 
 	FDM<double> FDM(f, conf);
 }

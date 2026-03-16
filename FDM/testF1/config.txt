@@ -1,0 +1,3 @@
+testF1/constants.txt
+testF1/segments.txt
+testF1/dirih.txt

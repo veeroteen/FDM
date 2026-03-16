@@ -1,0 +1,5 @@
+test6/constants.txt
+test6/segments.txt
+test6/dirih.txt
+test6/neumann.txt
+test6/robin.txt

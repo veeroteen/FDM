@@ -164,7 +164,7 @@ public:
 
 
 
-   void ZegelJac(unsigned n,T w,T e,bool zeg = true)
+   std::vector<T>* ZegelJac(unsigned n,T w,T e,bool zeg = true)
    {
       std::vector<T>* res, *cur;
       T discreancy = 0;
@@ -191,14 +191,10 @@ public:
          i++;
       } while (i < n && discreancy >= e);
       T cond = condition(cur);
-      //std::cout << std::setprecision(16) << "i: " << i << " discreancy: " << discreancy << " condition: " << cond << std::endl;
       std::cout << w << "   " <<  i << std::endl;
       
-      for(auto &a: *cur)
-      {
-         std::cout << std::setprecision(16) << a << std::endl;
-      }
-      
+      delete res;
+      return cur;
    }
 
    T optimalW(bool zeg = true)
