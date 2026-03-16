@@ -1,0 +1,5 @@
+testAprocs1/constants.txt
+testAprocs1/segments.txt
+testAprocs1/dirih.txt
+testAprocs1/neumann.txt
+testAprocs1/robin.txt

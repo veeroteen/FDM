@@ -1,6 +1,7 @@
 #include <iostream>
 #include "MISC.h"
 #include "FDM.h"
+#include <cmath>
 int main()
 {
 	std::map<std::string, double> arr;
@@ -8,10 +9,10 @@ int main()
 	
 	auto fun = [](const std::map<std::string, double> &args)
 		{
-			return 0;// 2 * (args.find("x")->second + args.find("y")->second);
+			return 2 * sin(args.find("x")->second + args.find("y")->second);
 		};
 	StaticFun<double> f(fun);
-	std::string conf = "testF1/config.txt";
+	std::string conf = "testAprocs2/config.txt";
 
 	FDM<double> FDM(f, conf);
 }

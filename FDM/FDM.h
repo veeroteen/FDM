@@ -68,8 +68,9 @@ public:
 
 		ZJMatrix<T> solver(D, I, F);
 
-		auto x = solver.ZegelJac(10000, solver.optimalW(false), 1E-16,false);
-	   
+		auto x = solver.ZegelJac(5000, solver.optimalW(true), 1E-16, true);
+		std::ofstream res("1-2.csv");
+		
 		for (size_t i = 0; i < nod.size(); i++)
 		{
 			if (nod[i].bound == BoundryCond::OUTLINE)
@@ -78,11 +79,12 @@ public:
 			}
 			else
 			{
-				std::cout << (*x)[i] << std::endl;
+				res << nod[i].cords.x << "\t" << nod[i].cords.y << "\t" << (*x)[i] << std::endl;
 			}
 
 		}
 
+		res.close();
 
 
 		return;
