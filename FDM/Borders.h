@@ -1,3 +1,4 @@
+//Borders.h
 #pragma once
 #include "MISC.h"
 #include <vector>
@@ -36,7 +37,7 @@ public:
    
    BaseBoundry(T x1, T x2, T y1,T y2) : x1(x1), x2(x2),y1(y1),y2(y2) {};
    virtual BoundryCond getType() = 0;
-   virtual void apply(Node<T> node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) = 0;
+   virtual void apply(std::vector<Node<T>>::iterator node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) = 0;
 };
 
 template <typename T>
@@ -51,14 +52,14 @@ public:
       return BoundryCond::DIRIH;
    }
 
-   void apply(Node<T> node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) override
+   void apply(std::vector<Node<T>>::iterator node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) override
    {
-		T val = cons->evaluate(node.cords);
-		F[node.n] = val;
-
+		T val = cons->evaluate(node->cords);
+		F[node->n] = val;
+		
 		for (int j = 0; j < 2; j++)
 		{
-			int buff = node.n - I[j];
+			int buff = node->n - I[j];
 			if (buff > 0 && buff < D[0]->size())
 			{
 				if ((*D[j])[buff] != 0)
@@ -71,7 +72,7 @@ public:
 		}
 		for (int j = 3; j < 5; j++)
 		{
-			int buff = node.n - I[j];
+			int buff = node->n - I[j];
 			if (buff > 0 && buff < D[0]->size())
 			{
 				if ((*D[j])[buff] != 0)
@@ -81,7 +82,7 @@ public:
 				}
 			}
 		}
-
+		
    }
 
 };
@@ -104,31 +105,33 @@ public:
 		return BoundryCond::NEUMAN;
 	}
 
-	void apply(Node<T> node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) override
+	void apply(std::vector<Node<T>>::iterator node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) override
 	{
-		size_t i = node.n;
-		T hx2 = node.h.x * node.h.x;
-		T hy2 = node.h.y * node.h.y;
+		size_t i = node->n;
+		T hx2 = node->h.x * node->h.x;
+		T hy2 = node->h.y * node->h.y;
+		double h = 0;
 		if (direction.y == 0)
 		{
 			if (direction.x < 0)
 			{
-				
-				(*D[0])[i] = -1 / hy2;
+				h = abs(node->cords.x - (node + I[3])->cords.x);
+				(*D[0])[i] = -2/ (node->h.y + (node + I[1])->h.y) / (node + I[1])->h.y;
 				(*D[1])[i] = 0;
-				(*D[2])[i] = 1 / hx2 + 2 / hy2;
+				(*D[2])[i] = 1 / (h * (h + node->h.x)) + 2 / (node->h.y * (node + I[1])->h.y);
 				(*D[3])[i] = -1 / hx2;
-				(*D[4])[i] = -1 / hy2;
-				F[i] = f.evaluate(node.cords) + g->evaluate(node.cords) / lambda / node.h.x;
+				(*D[4])[i] = -2 / (node->h.y + (node + I[1])->h.y) / node->h.y;
+				F[i] = f.evaluate(node->cords) - g->evaluate(node->cords) / (lambda * h * node->h.x);
 			}
 			else
 			{
-				(*D[0])[i] = -1 / hy2;
+				h = abs(node->cords.x - (node + I[1])->cords.x);
+				(*D[0])[i] = -2 / (node->h.y + (node + I[1])->h.y) / (node + I[1])->h.y;
 				(*D[1])[i] = -1 / hx2;
-				(*D[2])[i] = 1 / hx2 + 2 / pow(node.h.y, 2);
+				(*D[2])[i] = 2 / (h * (h + node->h.x)) + 2 / (node->h.y * (node + I[1])->h.y);;
 				(*D[3])[i] = 0;
-				(*D[4])[i] = -1 / hy2;
-				F[i] = f.evaluate(node.cords) - g->evaluate(node.cords) / lambda / node.h.x;
+				(*D[4])[i] = -2 / (node->h.y + (node + I[1])->h.y) / node->h.y;
+				F[i] = f.evaluate(node->cords) + g->evaluate(node->cords) / (lambda * h * node->h.x);
 			}
 			
 		}
@@ -136,23 +139,27 @@ public:
 		{
 			if (direction.y < 0)
 			{
-
+				h = abs(node->cords.y - (node + I[4])->cords.y);
 				(*D[0])[i] = 0;
-				(*D[1])[i] = -1 / hx2;
-				(*D[2])[i] = 2 / hx2 + 1 / hy2;
-				(*D[3])[i] = -1 / hx2;
+				(*D[1])[i] = -2 / (node->h.x + (node + I[1])->h.x) / (node + I[1])->h.x;
+				(*D[2])[i] = 2 / (h * (h + node->h.y)) + 2 / (node->h.x * (node + I[1])->h.x);
+				(*D[3])[i] = -2 / (node->h.x + (node + I[1])->h.x) / node->h.x;
 				(*D[4])[i] = -1 / hy2;
-				F[i] = f.evaluate(node.cords) + g->evaluate(node.cords) / lambda / node.h.y;
+				F[i] = f.evaluate(node->cords) - g->evaluate(node->cords) / (lambda * h * node->h.y);
 			}
 			else
 			{
-				(*D[0])[i] = -1 / hy2;
-				(*D[1])[i] = -1 / hx2;
-				(*D[2])[i] = 2 / hx2 + 1 / hy2;
-				(*D[3])[i] = -1 / hx2;
+				
+				h = abs(node->cords.y - (node + I[0])->cords.y);
+				(*D[0])[i] = -2 / (h * (h + node->h.y));
+				(*D[1])[i] = -2 / (node->h.x + (node + I[1])->h.x) / (node + I[1])->h.x;
+				(*D[2])[i] = 2 / (h*(h+node->h.y)) + 2 / (node->h.x * (node + I[1])->h.x);
+				(*D[3])[i] = -2 / (node->h.x + (node + I[1])->h.x) / node->h.x;
 				(*D[4])[i] = 0;
-				F[i] = f.evaluate(node.cords) - g->evaluate(node.cords) / lambda / node.h.y;
+				F[i] = f.evaluate(node->cords) + g->evaluate(node->cords) / (lambda*h*node->h.y);
+				
 			}
+
 		}
 	}
 
@@ -174,30 +181,32 @@ public:
 		return BoundryCond::ROBIN;
 	}
 
-	void apply(Node<T> node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) override
+	void apply(std::vector<Node<T>>::iterator node, Fun<T> &f, std::vector<std::vector<T> *> &D, std::array<int, 5> &I, std::vector<T> &F) override
 	{
 		T buff = beta / lambda;
-		size_t i = node.n;
+		size_t i = node->n;
+		double h = 0;
 		if (direction.y == 0)
 		{
 			if (direction.x < 0)
 			{
-
+				h = abs(node->cords.x - (node + I[3])->cords.x);
 				(*D[0])[i] = 0;
 				(*D[1])[i] = 0;
-				(*D[2])[i] = 1 / node.h.x + buff;
-				(*D[3])[i] = -1 / node.h.x;
+				(*D[2])[i] = 1 / h + buff;
+				(*D[3])[i] = -1 / h;
 				(*D[4])[i] = 0;
-				F[i] = buff * ub->evaluate(node.cords);
+				F[i] = buff * ub->evaluate(node->cords);
 			}
 			else
 			{
+				h = abs(node->cords.x - (node + I[1])->cords.x);
 				(*D[0])[i] = 0;
-				(*D[1])[i] = -1 / node.h.x;
-				(*D[2])[i] = 1 / node.h.x + buff;
+				(*D[1])[i] = -1 / h;
+				(*D[2])[i] = 1 / h + buff;
 				(*D[3])[i] = 0;
 				(*D[4])[i] = 0;
-				F[i] = buff * ub->evaluate(node.cords);
+				F[i] = buff * ub->evaluate(node->cords);
 			}
 
 		}
@@ -205,22 +214,23 @@ public:
 		{
 			if (direction.y < 0)
 			{
-
+				h = abs(node->cords.y - (node + I[4])->cords.y);
 				(*D[0])[i] = 0;
 				(*D[1])[i] = 0;
-				(*D[2])[i] = 1 / node.h.y + buff;
+				(*D[2])[i] = 1 / h + buff;
 				(*D[3])[i] = 0;
-				(*D[4])[i] = -1 / node.h.y;
-				F[i] = buff * ub->evaluate(node.cords);
+				(*D[4])[i] = -1 / h;
+				F[i] = buff * ub->evaluate(node->cords);
 			}
 			else
 			{
-				(*D[0])[i] = -1 / node.h.y;
+				h = abs(node->cords.y - (node + I[0])->cords.y);
+				(*D[0])[i] = -1 / h;
 				(*D[1])[i] = 0;
-				(*D[2])[i] = 1 / node.h.y + buff;
+				(*D[2])[i] = 1 / h + buff;
 				(*D[3])[i] = 0;
 				(*D[4])[i] = 0;
-				F[i] = buff * ub->evaluate(node.cords);
+				F[i] = buff * ub->evaluate(node->cords);
 			}
 		}
 	}

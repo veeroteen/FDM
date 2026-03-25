@@ -225,9 +225,8 @@ public:
             min.second = dis;
          }
         
-         auto b = res;
-         res = cur;
-         cur = b;
+         delete res;
+         delete cur;
       }
       return min.first;
    }

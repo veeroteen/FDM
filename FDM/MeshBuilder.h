@@ -11,12 +11,9 @@ template <Field T>
 size_t rayCastRight(const Vector2<T> &node, const std::vector<Border<T>> &borders);
 
 template <Field T>
-void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundaries, std::vector<Node<T>> *nodes,std::pair<int,int> &size, T &lambda, T &gamma)
+void MeshBuilder(std::string folder, std::vector<BaseBoundry<T> *> *boundaries, std::vector<Node<T>> *nodes,std::pair<int,int> &size, T &lambda, T &gamma)
 {
-	std::ifstream config(cfg);
-	
-	std::string constants;
-	std::getline(config, constants);
+	std::string constants = folder + "constants.txt";
 
 	{
 		std::ifstream constns(constants);
@@ -24,8 +21,8 @@ void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundari
 	}
 
 
-	std::string seg;
-	std::getline(config, seg);
+	std::string seg = folder + "segments.txt";
+
 	std::vector<Segment<T>> segX;
 	std::vector<Segment<T>> segY;
 	{
@@ -70,8 +67,7 @@ void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundari
 	std::vector<Border<T>> vertical, horizontal;
 
 	{
-		std::string drh;
-		std::getline(config, drh);
+		std::string drh = folder + "dirih.txt";
 		std::ifstream dirih(drh);
 		T x1, x2, y1, y2;
 		size_t n;
@@ -96,8 +92,7 @@ void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundari
 	}
 
 	{
-		std::string neu;
-		std::getline(config, neu);
+		std::string neu = folder + "neumann.txt";
 		std::ifstream neumann(neu);
 		T x1, x2, y1, y2,x,y;
 		size_t n = 0;
@@ -121,8 +116,7 @@ void MeshBuilder(const std::string &cfg, std::vector<BaseBoundry<T> *> *boundari
 	}
 
 	{
-		std::string rob;
-		std::getline(config, rob);
+		std::string rob = folder + "robin.txt";
 		std::ifstream robin(rob);
 		T x1, x2, y1, y2,beta,x,y;
 		size_t n = 0;

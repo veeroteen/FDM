@@ -1,5 +1,0 @@
-test5/constants.txt
-test5/segments.txt
-test5/dirih.txt
-test5/neumann.txt
-test5/robin.txt

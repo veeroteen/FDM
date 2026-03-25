@@ -1,3 +1,0 @@
-test1/constants.txt
-test1/segments.txt
-test1/dirih.txt

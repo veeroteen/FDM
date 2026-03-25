@@ -1,4 +1,0 @@
-test3/constants.txt
-test3/segments.txt
-test3/dirih.txt
-test3/neumann.txt
