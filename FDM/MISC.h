@@ -33,31 +33,6 @@ struct Vector2
    Vector2() = default;
 };
 
-template<Field T>
-void polyToStr(std::string &res,std::vector<T> &poly)
-{
-   res.clear();
-
-   res += std::to_string(poly[0]);
-   res += std::string("+" + std::to_string(poly[1]) + "x");
-   res += std::string("+" + std::to_string(poly[2]) + "y");
-   res += std::string("+" + std::to_string(poly[3]) + "z");
-}
-
-template <Field T>
-T calcPoly(const std::vector<double> &poly, T x, T y, T z)
-{
-   T res = poly[0];
-
-   for (size_t i = 0; i < (poly.size() - 1) / 3; i++)
-   {
-      res += poly[1 + i * 3] * pow(x, i + 1);
-      res += poly[2 + i * 3] * pow(y, i + 1);
-      res += poly[3 + i * 3] * pow(z, i + 1);
-
-   }
-   return res;
-}
 
 template <Field T>
 T scalar(const std::vector<T> &a, const std::vector<T> &b)

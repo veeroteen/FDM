@@ -31,15 +31,44 @@ void findMaxDes(std::string folder)
 
 }
 
+void findDot(double x,double y,std::string folder)
+{
+	std::ifstream anal(folder + "/anal.txt");
+	std::string funs = "";
+	std::getline(anal, funs);
+	anal.close();
+	StringFun<double> anals(funs);
+
+	std::ifstream data(folder + "/res.csv");
+	double _x, _y, un,ua;
+	Vector2<double> xy(0, 0);
+	while (data >> _x >> _y >> un)
+	{
+		xy.x = _x;
+		xy.y = _y;
+		ua = anals.evaluate(xy);
+		if (xy.x == x && xy.y == y)
+		{
+			std::cout << std::setprecision(16) << xy.x << "\t" << xy.y << "\t" << un << "\t" << anals.evaluate(xy) << std::endl;
+			break;
+		}
+	}
+	
+}
+
+
+
+
+
 void main()
 {
 	
-	std::string folder = "test3";
+	std::string folder = "test2";
 
 	FDM<double> FDM(folder);
 
 	findMaxDes(folder);
-
+	findDot(4.0, 4.0,folder);
 }
 
 
